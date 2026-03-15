@@ -3,299 +3,312 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GALAXY_OS // bekqueen_ MISSION</title>
+    <title>TRANSMISIÓN // GALAXY_S26_ULTRA</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap');
+
         :root {
             --cyan: #00f0ff;
             --magenta: #ff007f;
-            --purple: #b562ff;
-            --bg: #050b14;
-            --glass: rgba(10, 17, 40, 0.9);
+            --gold: #ffae00;
+            --bg-dark: #050a10;
+            --hud-bg: rgba(10, 15, 25, 0.85);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
 
         body {
-            background-color: var(--bg);
+            background-color: var(--bg-dark);
             background-image: 
                 linear-gradient(rgba(0, 240, 255, 0.05) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
-            background-size: 40px 40px;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            color: #e2e8f0;
+            background-size: 50px 50px;
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh; 
             display: flex;
             justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
+            align-items: flex-start; 
+            padding: 40px 20px;
+            overflow-x: hidden;
+            overflow-y: auto; 
+            position: relative;
         }
 
-        #loader {
+        body::before {
+            content: " "; display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 100; background-size: 100% 4px, 6px 100%; pointer-events: none;
+        }
+        
+        body::after {
+            content: ""; position: fixed; inset: 0; box-shadow: inset 0 0 100px rgba(0,0,0,0.9);
+            z-index: 99; pointer-events: none;
+        }
+
+        #start-screen { position: fixed; inset: 0; background: #000; z-index: 99999; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: opacity 0.5s ease; }
+        .start-btn { color: var(--cyan); font-family: 'Orbitron', monospace; font-size: 20px; letter-spacing: 3px; text-align: center; animation: blink 1.5s infinite; transition: transform 0.3s ease; }
+        .start-btn:hover { transform: scale(1.05); }
+        .start-btn span { color: var(--magenta); font-size: 14px; display: block; margin-top: 10px; }
+
+        #loader { position: fixed; inset: 0; background: var(--bg-dark); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px; transition: opacity 1s ease-in-out; }
+        .loader-terminal { width: 100%; max-width: 800px; font-family: 'Orbitron', monospace; color: var(--cyan); font-size: 16px; line-height: 1.8; text-shadow: 0 0 10px var(--cyan); }
+        .sys-text { color: var(--magenta); }
+        .blinking-cursor { animation: blink 1s step-end infinite; }
+
+        .game-ui { width: 100%; max-width: 1200px; position: relative; z-index: 10; display: flex; flex-direction: column; gap: 20px; opacity: 0; transition: opacity 1s ease-in-out; padding-bottom: 180px; }
+        .hud-top-panels { display: grid; grid-template-columns: 320px 1fr 300px; gap: 25px; align-items: start; position: relative; }
+
+        h1, h2, h3, .orbitron { font-family: 'Orbitron', sans-serif; }
+
+        .character-panel { display: flex; flex-direction: column; gap: 15px; }
+        .portrait { width: 100%; border: 2px solid var(--cyan); background: #000; position: relative; box-shadow: 0 0 15px rgba(0, 240, 255, 0.2); transition: all 0.3s ease; cursor: pointer; }
+        .portrait:hover { transform: scale(1.02); box-shadow: 0 0 30px rgba(0, 240, 255, 0.4); }
+        .portrait img { width: 100%; display: block; filter: contrast(1.1); }
+        .portrait-tag { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--cyan); color: #000; text-align: center; font-weight: 900; padding: 5px; font-size: 13px; letter-spacing: 2px; }
+
+        .inventory { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 5px; }
+        .inv-slot { aspect-ratio: 1/1; border: 1px solid rgba(0, 240, 255, 0.4); background: rgba(0, 240, 255, 0.05); display: flex; justify-content: center; align-items: center; font-size: 10px; text-align: center; color: var(--cyan); font-family: 'Orbitron', sans-serif; transition: all 0.3s ease; }
+        .inv-slot:hover { transform: scale(1.1); background: rgba(0, 240, 255, 0.15); border-color: var(--cyan); }
+        .inv-slot.legendary { border: 2px dashed var(--gold); color: var(--gold); animation: pulse-gold 2s infinite; }
+        .inv-slot.legendary:hover { border-style: solid; box-shadow: 0 0 20px var(--gold); }
+        @keyframes pulse-gold { 0%, 100% { box-shadow: inset 0 0 0 var(--gold); } 50% { box-shadow: inset 0 0 20px var(--gold); } }
+
+        .skill-popup { background: rgba(255, 0, 127, 0.05); border: 1px solid var(--magenta); backdrop-filter: blur(8px); padding: 30px; box-shadow: 0 0 30px rgba(255, 0, 127, 0.15); position: relative; }
+        .skill-popup::before { content: "ULTIMATE SKILL UNLOCKED"; position: absolute; top: -12px; right: 20px; background: var(--magenta); color: #fff; font-size: 11px; font-weight: bold; padding: 4px 15px; font-family: 'Orbitron', sans-serif; letter-spacing: 2px; }
+        .corner { position: absolute; width: 20px; height: 20px; border: 2px solid var(--magenta); z-index: 50; }
+        .c-tl, .c-tr, .c-bl, .c-br { position: absolute; }
+        .c-tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+        .c-tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+        .c-bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+        .c-br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+        .skill-list { margin-top: 25px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .perk { background: rgba(0,0,0,0.6); border: 1px solid #334155; padding: 15px; font-size: 14px; color: #cbd5e1; line-height: 1.5; transition: all 0.3s ease; }
+        .perk:hover { transform: translateY(-4px); background: rgba(10, 15, 25, 0.9); border-color: var(--cyan); }
+        .perk strong { color: var(--cyan); display: block; margin-bottom: 8px; font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 1px;}
+
+        .quest-tracker { background: var(--hud-bg); border: 1px solid rgba(0, 240, 255, 0.2); padding: 25px; backdrop-filter: blur(5px); box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.05); }
+        .quest-tracker h3 { color: var(--gold); margin-bottom: 20px; font-size: 16px; border-bottom: 1px solid var(--gold); padding-bottom: 5px; }
+        .objective { margin-bottom: 15px; font-size: 14px; color: #cbd5e1; display: flex; gap: 10px; align-items: center; transition: all 0.2s ease; }
+        .objective:not(.done):hover { background: rgba(255, 255, 255, 0.05); color: #fff; padding: 2px 5px; margin: -2px -5px 13px -5px; }
+        .objective::before { content: "[ ]"; color: var(--cyan); font-family: monospace; font-size: 16px;}
+        .objective.done::before { content: "[x]"; color: #10b981; }
+        .objective.done { color: #10b981; text-decoration: line-through; }
+        .objective.active { color: #fff; text-shadow: 0 0 5px #fff; }
+        .objective.active::before { content: "[!]"; color: var(--gold); animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        .dialogue-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); width: calc(100% - 40px); max-width: 850px; background: linear-gradient(180deg, rgba(5,10,16,0.95) 0%, rgba(5,10,16,0.98) 100%); border: 2px solid #fff; border-top: 4px solid var(--cyan); border-radius: 4px; padding: 25px; box-shadow: 0 15px 40px rgba(0,0,0,0.9), 0 0 30px rgba(0, 240, 255, 0.15); z-index: 1000; }
+        .speaker-name { position: absolute; top: -24px; left: -2px; background: var(--cyan); color: #000; padding: 6px 25px; font-weight: 900; font-family: 'Orbitron', sans-serif; font-size: 16px; clip-path: polygon(0 0, 90% 0, 100% 100%, 0% 100%); }
+        .dialogue-content { display: flex; gap: 20px; align-items: center; } 
+        .dialogue-avatar { width: 75px; height: 75px; border: 2px solid var(--cyan); border-radius: 8px; object-fit: cover; box-shadow: 0 0 15px rgba(0, 240, 255, 0.3); flex-shrink: 0; }
+        .dialogue-text { font-size: 17px; line-height: 1.5; color: #e2e8f0; text-shadow: 1px 1px 2px #000; min-height: 75px; margin-top: 0; }
+        .dialogue-text .highlight, .dialogue-text .jury { font-weight: bold; }
+        .dialogue-text .highlight { color: var(--cyan); }
+        .dialogue-text .jury { color: var(--gold); }
+        .continue-arrow { position: absolute; bottom: 15px; right: 20px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 12px solid var(--cyan); animation: bounce 1s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+
+        #dossier-overlay {
             position: fixed;
             inset: 0;
-            background: var(--bg);
-            z-index: 999;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 9999;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: opacity 0.8s ease;
-        }
-
-        .loader-terminal {
-            font-family: 'Consolas', monospace;
-            font-size: 14px;
-            color: var(--cyan);
-            margin-bottom: 20px;
-            text-shadow: 0 0 10px var(--cyan);
-        }
-
-        .bar-container {
-            width: 320px;
-            height: 4px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 2px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .bar-fill {
-            width: 0%;
-            height: 100%;
-            background: var(--cyan);
-            box-shadow: 0 0 20px var(--cyan);
-            animation: bootLoad 3s forwards cubic-bezier(0.19, 1, 0.22, 1);
-        }
-
-        @keyframes bootLoad {
-            0% { width: 0%; }
-            20% { width: 30%; }
-            50% { width: 45%; }
-            80% { width: 90%; }
-            100% { width: 100%; }
-        }
-
-        .hud-wrapper {
-            max-width: 850px;
-            width: 100%;
-            background: var(--glass);
-            border: 1px solid var(--cyan);
-            border-radius: 24px 0 24px 0;
-            box-shadow: 0 0 40px rgba(0, 240, 255, 0.15), inset 0 0 20px rgba(0,0,0,0.9);
-            padding: 40px;
-            position: relative;
             opacity: 0;
-            transform: scale(0.98);
-            transition: all 0.8s ease 3.2s;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
         }
-
-        .hud-wrapper.ready {
+        #dossier-overlay.visible {
             opacity: 1;
+            pointer-events: all;
+        }
+        .dossier-card {
+            width: 90%;
+            max-width: 500px;
+            background: var(--bg-dark);
+            border: 1px solid var(--cyan);
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 0 40px rgba(0, 240, 255, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #dossier-overlay.visible .dossier-card {
             transform: scale(1);
         }
-
-        .hud-wrapper::before {
-            content: " ";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
-            background-size: 100% 3px, 3px 100%;
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        /* --- Elementos HUD --- */
-        .mission-badge {
-            background: linear-gradient(45deg, var(--magenta), var(--purple));
-            color: white;
-            padding: 4px 15px;
-            font-size: 12px;
-            font-weight: 900;
-            letter-spacing: 2px;
-            border-radius: 10px 0;
-            box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            margin: 30px 0;
-        }
-
-        .stat-box {
-            background: rgba(0, 240, 255, 0.03);
-            border-left: 2px solid var(--cyan);
-            padding: 15px;
-        }
-
-        .stat-label { font-size: 10px; color: var(--cyan); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
-        .stat-value { font-weight: bold; font-size: 15px; color: #fff; }
-
-        .image-frame {
-            border: 1px solid rgba(181, 98, 255, 0.4);
-            padding: 12px;
-            background: rgba(0,0,0,0.4);
-            margin-bottom: 35px;
-            position: relative;
-        }
-
-        .image-frame::after {
-            content: "✦ ASSET_LOADED: bekqueen_render.png ✦";
-            position: absolute;
-            top: -10px; left: 20px;
-            background: var(--bg);
-            color: var(--purple);
+        .dossier-header { display: flex; align-items: center; gap: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 20px; }
+        .dossier-avatar { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 2px solid var(--cyan); }
+        .skill-bar { height: 6px; background: rgba(0,240,255,0.2); border-radius: 3px; margin-top: 5px; }
+        .skill-fill { height: 100%; background: var(--cyan); border-radius: 3px; }
+        .signature {
+            position: fixed;
+            bottom: 10px; right: 10px;
+            font-family: 'Orbitron', monospace;
             font-size: 10px;
-            font-weight: bold;
-            padding: 0 10px;
-            border: 1px solid var(--purple);
+            color: rgba(0, 240, 255, 0.4);
+            letter-spacing: 2px;
+            z-index: 1001;
+            opacity: 0.5;
+            animation: holo-flicker 5s infinite;
+        }
+        @keyframes holo-flicker {
+            0%, 100% { opacity: 0.5; text-shadow: 0 0 5px rgba(0, 240, 255, 0.3); }
+            50% { opacity: 0.8; text-shadow: 0 0 10px rgba(0, 240, 255, 0.5); }
         }
 
-        .lore-text {
-            font-style: italic;
-            color: #cbd5e1;
-            line-height: 1.8;
-            margin-bottom: 35px;
-            min-height: 80px;
-        }
-
-        .ultimate-card {
-            background: linear-gradient(135deg, rgba(255, 0, 127, 0.15) 0%, transparent 100%);
-            border: 1px solid var(--magenta);
-            border-radius: 16px;
-            padding: 25px;
-            margin-bottom: 35px;
-            box-shadow: 0 0 25px rgba(255, 0, 127, 0.1);
-        }
-
-        .passives-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .skill-box {
-            background: rgba(15, 23, 42, 0.5);
-            border: 1px solid rgba(181, 98, 255, 0.2);
-            border-top: 3px solid var(--purple);
-            padding: 20px;
-            border-radius: 4px;
-        }
-
-        .skill-box.cyan { border-top-color: var(--cyan); border-color: rgba(0, 240, 255, 0.2); }
-
-        .terminal-footer {
-            margin-top: 40px;
-            border-top: 1px solid rgba(0, 240, 255, 0.2);
-            padding-top: 20px;
-            display: flex;
-            justify-content: space-between;
-            font-family: 'Consolas', monospace;
-            font-size: 12px;
-        }
-
-        .neon-glow { animation: neon 1.5s ease-in-out infinite alternate; }
-        @keyframes neon { from { text-shadow: 0 0 5px var(--cyan); } to { text-shadow: 0 0 15px var(--cyan), 0 0 20px var(--cyan); } }
-
-        @media (max-width: 600px) {
-            .hud-wrapper { padding: 25px 15px; }
-            .passives-grid { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 1100px) { .hud-top-panels { grid-template-columns: 300px 1fr; } .quest-tracker { grid-column: 1 / 3; } }
+        @media (max-width: 850px) { .hud-top-panels { grid-template-columns: 1fr; } .character-panel, .skill-popup, .quest-tracker { grid-column: 1; } .skill-list { grid-template-columns: 1fr; } .dialogue-avatar { width: 60px; height: 60px; } .dialogue-text { font-size: 14px; } }
     </style>
 </head>
 <body>
 
-    <div id="loader">
-        <div class="loader-terminal">> INITIALIZING_BEKQUEEN_UI_CORE...</div>
-        <div class="bar-container"><div class="bar-fill"></div></div>
-        <div style="margin-top: 15px; font-family: monospace; font-size: 10px; color: #57606a;">CARGANDO LIBRERÍAS DE UNREAL_ENGINE_5...</div>
+<div id="start-screen" onclick="startExperience()">
+    <div class="start-btn">
+        [ SEÑAL INTERCEPTADA ]
+        <span>>> HAZ CLIC PARA ESTABLECER ENLACE TÁCTICO <<</span>
     </div>
+</div>
 
-    <div class="hud-wrapper" id="main-hud">
-        <div style="background: rgba(255,255,255,0.02); border: 1px dashed rgba(0,240,255,0.3); padding: 15px; margin-bottom: 30px; font-family: 'Consolas', monospace; font-size: 13px;">
-            <span style="color: var(--cyan)">[ MISSION_INIT ]</span><br>
-            "¡Hola equipo Samsung! 👋 Como Jefa de TI, Startup Founder y Game Dev, mi vida diaria se compila entre servidores, código y diseño. Para esta misión decidí 'compilar' mi participación directamente en esta terminal junto a un self-portrait ilustrado por mí. ¡Espero que disfruten el despliegue!"
-        </div>
+<div id="loader">
+    <div class="loader-terminal">
+        <span id="load-text"></span><span class="blinking-cursor">_</span>
+    </div>
+</div>
 
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
+<div id="dossier-overlay" onclick="toggleDossier(false)">
+    <div class="dossier-card">
+        <div class="dossier-header">
+            <img src="https://raw.githubusercontent.com/RBJZZ/assets/refs/heads/main/icon.jpg" alt="Agent Icon" class="dossier-avatar" onerror="this.src='https://raw.githubusercontent.com/RBJZZ/assets/refs/heads/main/Becky%7E3-EDIT.jpg'">
             <div>
-                <p style="color: var(--cyan); font-size: 10px; letter-spacing: 4px; font-weight: bold;">PROTOCOL_INITIALIZATION</p>
-                <h1 class="neon-glow" style="font-size: 24px; color: #fff;">// PROYECTO: GALAXY_S26_ULTRA</h1>
+                <h2 style="font-family: 'Orbitron'; color: var(--cyan);">AGENT_DOSSIER: @BEKQUEEN_</h2>
+                <p style="color: var(--gold); font-weight: bold;">LVL 99 SYSADMIN & FOUNDER</p>
             </div>
-            <div class="mission-badge">RANGO_S</div>
         </div>
-
-        <div class="stats-grid">
-            <div class="stat-box"><p class="stat-label">PLAYER_ID</p><p class="stat-value">@bekqueen_</p></div>
-            <div class="stat-box"><p class="stat-label">CLASE_BASE</p><p class="stat-value">Jefa TI / Founder</p></div>
-            <div class="stat-box"><p class="stat-label">ESPECIALIDAD</p><p class="stat-value">PM & Game Dev</p></div>
-            <div class="stat-box"><p class="stat-label">LOADOUT</p><p class="stat-value">G9 + Tab S10 Ultra</p></div>
+        <div>
+            <p style="font-size: 0.8rem; color: #a1a1aa; margin-bottom: 5px;">SKILLSET:</p>
+            <p style="font-weight: bold; margin-bottom: 10px;">Full-Stack Development & Project Management</p>
+            <div class="skill-bar"><div class="skill-fill" style="width: 95%;"></div></div>
+            <p style="font-weight: bold; margin-top: 15px;">Unreal Engine 5 (C++ / Blueprints)</p>
+            <div class="skill-bar"><div class="skill-fill" style="width: 85%;"></div></div>
+            <p style="font-weight: bold; margin-top: 15px;">Startup Infrastructure & Server Management</p>
+            <div class="skill-bar"><div class="skill-fill" style="width: 90%;"></div></div>
         </div>
+        <p style="text-align: center; margin-top: 25px; color: var(--magenta); font-size: 0.8rem; font-family: monospace;">[ HAZ CLIC FUERA PARA CERRAR ]</p>
+    </div>
+</div>
 
-        <div class="image-frame">
-            <img src="https://raw.githubusercontent.com/RBJZZ/assets/refs/heads/main/Becky%7E3-EDIT.jpg" alt="bekqueen_ Splash Art" style="width: 100%; display: block; filter: contrast(1.1);">
+<div class="game-ui" id="main-ui">
+    <div class="hud-top-panels">
+        <div class="character-panel">
+            <div style="font-family: 'Orbitron'; color: var(--cyan); font-size: 13px; letter-spacing: 2px;">STATUS: IN COMBAT</div>
+            <div class="portrait" onclick="toggleDossier(true)">
+                <img src="https://raw.githubusercontent.com/RBJZZ/assets/refs/heads/main/Becky%7E3-EDIT.jpg" alt="Player">
+                <div class="portrait-tag">LVL 99 SYSADMIN & FOUNDER</div>
+            </div>
+            <div style="font-size: 12px; margin-top: 5px; color: #cbd5e1; font-family: 'Orbitron';">EQUIPMENT LOADOUT:</div>
+            <div class="inventory">
+                <div class="inv-slot">ODYSSEY<br>G9</div>
+                <div class="inv-slot">TAB S10<br>ULTRA</div>
+                <div class="inv-slot legendary">S26<br>ULTRA<br>?</div>
+            </div>
         </div>
-
-        <div class="lore-text">
-            <p id="typewriter"></p>
-        </div>
-
-        <div class="ultimate-card">
-            <div style="color: var(--magenta); font-size: 11px; font-weight: 900; letter-spacing: 2px; margin-bottom: 12px; text-transform: uppercase;">🔥 Habilidad Definitiva Requerida</div>
-            <p style="font-size: 17px; line-height: 1.7;">
-                <strong>Con mi <span style="color: var(--cyan);">#GalaxyS26</span> y <span style="color: var(--cyan);">#NowNudge</span> podré</strong> dominar el caos de mi día a día. Si estoy renderizando en Unreal a contrarreloj y me llega un correo alertando que el servidor de la empresa se cayó, no necesito entrar en pánico ni pausar mi flujo. El núcleo de <strong style="color: var(--magenta);">#GalaxyAI</strong> analiza el contexto de mi pantalla y me permite accionar soluciones o agendar la junta de emergencia con mi equipo dev con un solo toque.
+        <div class="skill-popup">
+            <div class="corner c-tl"></div><div class="corner c-tr"></div><div class="corner c-bl"></div><div class="corner c-br"></div>
+            <h2 style="color: var(--magenta); margin-bottom: 20px; font-size: 24px; letter-spacing: 1px;">TACTICAL DEPLOYMENT: #GALAXYAI</h2>
+            <p style="font-size: 17px; line-height: 1.7; color: #f8fafc;">
+                <strong>Con mi <span style="color: var(--cyan);">#GalaxyS26</span> y <span style="color: var(--cyan);">#NowNudge</span> podré</strong> ejecutar contramedidas instantáneas contra las crisis. Cuando una alerta de alto nivel (como la caída de un servidor de la empresa) impacta en medio de una operación crítica (salvar la carrera o un render pesado) evito ser penalizada con 'pánico'. El procesador de <strong style="color: var(--magenta);">#GalaxyAI</strong> entiende mi contexto y despliega un menú de respuesta táctico, permitiéndome ejecutar protocolos de emergencia con una sola acción, sin comprometer mi trabajo.
             </p>
-        </div>
-
-        <div style="color: var(--purple); font-size: 11px; font-weight: 900; letter-spacing: 2px; margin-bottom: 20px; text-transform: uppercase;">🛡️ Árbol de Habilidades Pasivas</div>
-        <div class="passives-grid">
-            <div class="skill-box">
-                <h4 style="color: #fff; margin-bottom: 10px;">✨ #SPen Sync</h4>
-                <p style="font-size: 14px; color: #cbd5e1; line-height: 1.5;">Boceto la arquitectura del nuevo módulo del sistema en el transporte y se sincroniza en tiempo real con mi Tab S10 Ultra. Evito la fragmentación de ideas.</p>
-            </div>
-            <div class="skill-box">
-                <h4 style="color: #fff; margin-bottom: 10px;">✨ #TranscriptAssist</h4>
-                <p style="font-size: 14px; color: #cbd5e1; line-height: 1.5;">Como Project Manager, grabo los sprints de desarrollo. #GalaxyAI separa las voces del equipo y genera action items automáticos. Minutas sin esfuerzo.</p>
-            </div>
-            <div class="skill-box cyan">
-                <h4 style="color: #fff; margin-bottom: 10px;">🛡️ #KnoxVault Fortress</h4>
-                <p style="font-size: 14px; color: #cbd5e1; line-height: 1.5;">Las credenciales de la infraestructura de servidores, y datos de mi startup son críticos. Esto no es una carpeta segura, es una bóveda hardware. Paz mental total.</p>
-            </div>
-            <div class="skill-box">
-                <h4 style="color: #fff; margin-bottom: 10px;">🔒 #PrivacyDisplay</h4>
-                <p style="font-size: 14px; color: #cbd5e1; line-height: 1.5;">Perfecto para revisar roadmaps o presupuestos sensibles mientras viajo. La pantalla se vuelve ilegible desde los lados. Datos confidenciales siempre a salvo.</p>
+            <div class="skill-list">
+                <div class="perk"><strong>✦ #SPEN SYNC</strong> Anula el debuff 'Fuga de ideas'. Permite trazar blueprints tácticos en campo abierto que se sincronizan al instante con la estación base (TAB_S10_ULTRA)</div>
+                <div class="perk"><strong>✦ #TRANSCRIPTASSIST</strong> Cancela el hechizo 'Caos de comunicación', El procesador de IA analiza multiples fuentes de audio en los sprints y genera automaticamente action items. Ahorra energía.</div>
+                <div class="perk"><strong>✦ #KNOXVAULT</strong> Activa el escudo 'Fortaleza Digital'. Protege los activos críticos de los servidores y de la startup a nivel de hardware. Inmunidad a ataques de datos.</div>
+                <div class="perk"><strong>✦ #PRIVACYDISPLAY</strong> Habilita 'Modo Sigilo'. Oscurece la pantalla desde ángulos laterales, neutralizando el espionaje de entidades externas al revisar datos críticos en campo abierto.</div>
             </div>
         </div>
-
-        <div class="terminal-footer">
-            <span style="color: var(--cyan)">> sys.deploy("Misión_Completada");</span>
-            <span style="color: #10b981;">[ Recompensa: Paz Mental Garantizada ]</span>
+        <div class="quest-tracker">
+            <h3>ACTIVE QUESTS</h3>
+            <div class="objective done">Build Heavy Workstation</div>
+            <div class="objective done">Launch Startup</div>
+            <div class="objective done">Compile UE5 Shaders</div>
+            <div class="objective active">Acquire Galaxy S26 Ultra</div>
+            <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                <div style="font-size: 11px; color: var(--cyan); font-family: 'Orbitron'; letter-spacing: 1px;">TARGET AUDIENCE:</div>
+                <div style="color: var(--gold); font-weight: bold; font-size: 14px; margin-top: 8px;">SAMSUNG HIGH COMMAND</div>
+                <div style="color: #fff; font-weight: bold; font-size: 14px; margin-top: 5px;">FELLOW MEMBERS</div>
+            </div>
         </div>
     </div>
+</div>
 
-    <script>
-        const loreText = "Cualquiera que vea mi inmensa pantalla llena de terminales y código, pensaría que intento hackear la matrix. Mi día es un 'boss fight' constante: dirigir un departamento de TI, compilar shaders en Unreal Engine 5 y levantar mi propia startup de software. Tengo la estación de trabajo pesada asegurada, pero mi barra de energía se agota rápido. Necesito el artefacto definitivo para la movilidad táctica y automatizar mi vida para sobrevivir al farmeo diario de experiencia.";
-        
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.getElementById('loader').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('loader').style.display = 'none';
-                    document.getElementById('main-hud').classList.add('ready');
-                    startTypewriter();
-                }, 800);
-            }, 3000);
-        });
+<div class="dialogue-container" id="dialogue-box" style="opacity: 0; pointer-events: none; transition: opacity 1s ease;">
+    <div class="speaker-name">@BEKQUEEN_</div>
+    <div class="dialogue-content">
+        <img src="https://raw.githubusercontent.com/RBJZZ/assets/refs/heads/main/icon.jpg" alt="Avatar Dialogo" class="dialogue-avatar" onerror="this.src='https://raw.githubusercontent.com/RBJZZ/assets/refs/heads/main/Becky%7E3-EDIT.jpg'">
+        <p class="dialogue-text" id="typewriter"></p>
+    </div>
+    <div class="continue-arrow"></div>
+</div>
 
-        let i = 0;
-        function startTypewriter() {
-            if (i < loreText.length) {
-                document.getElementById("typewriter").innerHTML += loreText.charAt(i);
-                i++;
-                setTimeout(startTypewriter, 15);
-            }
+<div class="signature">HUD DESIGN_BY_BEKQUEEN_</div>
+
+<script>
+    const dossierOverlay = document.getElementById('dossier-overlay');
+    function toggleDossier(show) {
+        if (show) {
+            playBeep(1200, 'sine', 0.1, 0.2);
+            dossierOverlay.classList.add('visible');
+        } else {
+            playBeep(800, 'sawtooth', 0.05, 0.1);
+            dossierOverlay.classList.remove('visible');
         }
-    </script>
+    }
+
+    let audioCtx;
+    function initAudio() { if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } if (audioCtx.state === 'suspended') { audioCtx.resume(); } }
+    function playBeep(freq = 800, type = 'square', vol = 0.05, dur = 0.05) { if(!audioCtx) return; const os = audioCtx.createOscillator(); const gain = audioCtx.createGain(); os.type = type; os.frequency.setValueAtTime(freq, audioCtx.currentTime); gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur); os.connect(gain); gain.connect(audioCtx.destination); os.start(); os.stop(audioCtx.currentTime + dur); }
+    function playSuccess() { playBeep(400, 'square', 0.1, 0.1); setTimeout(() => playBeep(600, 'square', 0.1, 0.1), 100); setTimeout(() => playBeep(1200, 'sine', 0.2, 0.5), 200); }
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    function startExperience() {
+        initAudio();
+        document.getElementById('start-screen').style.opacity = '0';
+        setTimeout(() => { document.getElementById('start-screen').style.display = 'none'; document.getElementById('loader').style.display = 'flex'; runBootSequence(); }, 500);
+    }
+
+    async function runBootSequence() {
+        const loadText = document.getElementById("load-text");
+        await sleep(400); playBeep(300, 'sine', 0.1, 0.2); loadText.innerHTML += "<span class='sys-text'>[SISTEMA] INTERCEPTANDO TRANSMISIÓN...</span><br><br>"; await sleep(800);
+        const typeString = async (str, delay = 30) => { for(let c of str) { loadText.innerHTML += c; if(c !== " " && Math.random() > 0.3) playBeep(700 + Math.random()*200, 'square', 0.02, 0.03); await sleep(delay); } };
+        await typeString("« ¿Hola? ¿Me copian en Samsung High Command? »\n", 30); loadText.innerHTML += "<br>"; await sleep(600);
+        await typeString("« Aquí la agente @bekqueen_. Mi ecosistema está al límite. Los servidores reportan anomalías y el render en Unreal está al 99%. »\n", 25); loadText.innerHTML += "<br>"; await sleep(600);
+        await typeString("« Solicito refuerzos tácticos. Repito, necesito el despliegue del ítem legendario: El S26 Ultra. »\n", 30); loadText.innerHTML += "<br><br>"; await sleep(800);
+        playBeep(900, 'sine', 0.1, 0.3); loadText.innerHTML += "<span class='sys-text'>[SISTEMA] ENLACE ESTABLECIDO. INICIANDO INTERFAZ DE COMBATE...</span><br>"; await sleep(1000);
+        document.getElementById('loader').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('main-ui').style.opacity = '1';
+            let dialogBox = document.getElementById('dialogue-box'); dialogBox.style.opacity = '1'; dialogBox.style.pointerEvents = 'auto';
+            playSuccess(); setTimeout(typeMainDialogue, 800);
+        }, 1000);
+    }
+
+    const mainText = "¡Atención <span class='jury'>Samsung High Command</span> y <span class='highlight'>Members</span>! Las misiones diarias están saturándome, el rendimiento cae en picada... No sé si ganaré mis próximas batallas sin perder el foco de lo importante. La estación base funciona estable, pero necesito movilidad táctica para sobrevivir. Solicito autorización para el drop del S26 Ultra.";
+    let j = 0; let isTag = false; let mainTextHTML = "";
+    function typeMainDialogue() {
+        if (j < mainText.length) {
+            let char = mainText.charAt(j); if (char === '<') isTag = true; if (char === '>') isTag = false;
+            mainTextHTML += char; document.getElementById("typewriter").innerHTML = mainTextHTML; j++;
+            if(!isTag && char.trim() !== "") { playBeep(600, 'sine', 0.03, 0.03); }
+            let speed = isTag ? 0 : 25; setTimeout(typeMainDialogue, speed);
+        }
+    }
+</script>
+
 </body>
 </html>
